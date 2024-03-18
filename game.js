@@ -13,7 +13,7 @@ let config = {
     scene: {
         preload: preload,
         create: create,
-       
+        update: update
     }
 };
 
@@ -36,9 +36,10 @@ function preload() {
     this.load.image('bush', 'assets/bush.webp')
     this.load.image('tree', 'assets/tree.png')
     this.load.image('stone', 'assets/Stone.webp')
+
     this.load.spritesheet('dude',
-    'assets/dude.png',
-    { frameWidth: 32, frameHeight: 48 });
+        'assets/dude.png',
+        { frameWidth: 32, frameHeight: 48 });
 
 
 
@@ -73,14 +74,17 @@ function create() {
     for (var x = 0; x < worldWidth; x = x + Phaser.Math.Between(400, 500)) {
         var y = Phaser.Math.Between(300, 900)
 
-        platforms.create(x, y, 'skyGroundStart');
+        platforms.create(x, y, 'skyGroundStart')
+        .setDepth(11);
 
         var i;
         for (i = 1; i < Phaser.Math.Between(0, 5); i++) {
-            platforms.create(x + 128 * i, y, 'skyGround').setScale;
+            platforms.create(x + 128 * i, y, 'skyGround')
+            .setDepth(11);
         }
 
-        platforms.create(x + 128 * i, y, 'skyGroundEnd');
+        platforms.create(x + 128 * i, y, 'skyGroundEnd')
+        .setDepth(11);
     }
 
     box = this.physics.add.staticGroup();
@@ -88,7 +92,7 @@ function create() {
     for (var x = 0; x < worldWidth; x = x + Phaser.Math.FloatBetween(500, 1500)) {
         var y = 952;
         box.create(x, y, 'tree')
-            .setScale(Phaser.Math.FloatBetween(0.4, 1))
+            .setScale(Phaser.Math.FloatBetween(0.1, 0.5))
             .setOrigin(0, 1)
             .setDepth(Phaser.Math.FloatBetween(0, 10))
             .refreshBody();
@@ -117,7 +121,7 @@ function create() {
 
     // про гравця
     player = this.physics.add.sprite(100, 450, 'dude')
-        .setDepth(5)
+        .setDepth(11)
         .setBounce(0.2)
         .setCollideWorldBounds(false);
 
@@ -147,41 +151,43 @@ function create() {
     //  задання управління
     cursors = this.input.keyboard.createCursorKeys();
 
-    // зірочки
+    // зірки
     stars = this.physics.add.group({
         key: 'star',
         repeat: worldWidth / 100,
         setXY: { x: 12, y: 0, stepX: 100 }
+    
     });
 
     stars.children.iterate(function (child) {
 
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-
+        
     });
 
-    // коллайдер зірочок та платформ
-    this.physics.add.collider(stars, platforms);
 
-    //  стикання колайдера гравця з колайдером зірочок
+    this.physics.add.collider(stars, platforms);
     this.physics.add.overlap(player, stars, collectStar, null, this);
 
     //  рахунок
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' })
         .setOrigin(0, 0)
         .setScrollFactor(0);
+
+
+        //фізика та колайдери
     bombs = this.physics.add.group();
     this.physics.add.collider(bombs, platforms);
     this.physics.add.collider(player, bombs, hitBomb, null, this);
-    this.physics.add.collider(star, platforms);
-    this.physics.add.overlap(player, heart, collectHeart, null, this);
+    this.physics.add.collider(platforms);
+    this.physics.add.overlap(player, null, this);
     this.cameras.main.setBounds(0, 0, worldWidth, 1080);
     this.physics.world.setBounds(0, 0, worldWidth, 1080);
     this.cameras.main.startFollow(player);
 }
 
 function update() {
-    // саме управління
+    // управління
     if (cursors.left.isDown) {
         player.setVelocityX(-config.playerSpeed);
 
@@ -232,7 +238,6 @@ function collectStar(player, star) {
 function hitBomb(player, bomb) {
     life -= 1;
     bomb.disableBody(true, true);
-    lifeText.setText(showLife());
 
     if (life === 0) {
         this.physics.pause();
@@ -243,9 +248,24 @@ function hitBomb(player, bomb) {
 
         gameOver = true;
 
-        const helloButton = this.add.text(600, 400, 'Restart game', { fontSize: 90, fill: '#FFF', backgroundColor: '#111' })
-            .on('pointerdown', () => this.scene.restart(), life = 5)
-            .setScrollFactor(0)
-            .setInteractive();
+       
     }
+
+
+    resetyButton.on('pointerdown', function() {
+        self.physics.resume();
+        player.disableBody(true, true);
+        player = self.physics.add.sprite(100, 450, 'dude');
+        player.setBounce(0, 2);
+        player.setCollideWorldBounds(true);
+        gameOver = false;
+        self.scene.restart();
+        score = 0;
+        
+
+    }
+    
+    
+    
+    )
 }
