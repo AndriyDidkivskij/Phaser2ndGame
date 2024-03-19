@@ -18,8 +18,9 @@ let config = {
 };
 
 let game = new Phaser.Game(config);
-let worldWidth = config.width * 6;
+let worldWidth = config.width * 8;
 let platforms;
+let life = 5;
 let score = 0;
 let scoreText;
 let lifeText;
@@ -87,11 +88,11 @@ function create() {
         .setDepth(11);
     }
 
-    box = this.physics.add.staticGroup();
+    tree = this.physics.add.staticGroup();
     // Додавання дерев випадковим чином на всю ширину екрану
     for (var x = 0; x < worldWidth; x = x + Phaser.Math.FloatBetween(500, 1500)) {
         var y = 952;
-        box.create(x, y, 'tree')
+        tree.create(x, y, 'tree')
             .setScale(Phaser.Math.FloatBetween(0.1, 0.5))
             .setOrigin(0, 1)
             .setDepth(Phaser.Math.FloatBetween(0, 10))
@@ -108,11 +109,11 @@ function create() {
             .refreshBody();
     }
 
-    rock = this.physics.add.staticGroup();
+    stone = this.physics.add.staticGroup();
     // Додавання каменів випадковим чином на всю ширину екрану
     for (var x = 0; x < worldWidth; x = x + Phaser.Math.FloatBetween(300, 700)) {
         var y = 952;
-        rock.create(x, y, 'stone')
+        stone.create(x, y, 'stone')
             .setScale(Phaser.Math.FloatBetween(0.1, 0.2))
             .setOrigin(0, 1)
             .setDepth(Phaser.Math.FloatBetween(0, 10))
@@ -186,6 +187,42 @@ function create() {
     this.cameras.main.startFollow(player);
 }
 
+
+// життя
+hearts = this.physics.add.group({
+    key: 'heartss',
+    repeat: 10,
+    setXY: { x: 12, y: 0, stepX: Phaser.Math.FloatBetween(1000, 2500) }
+}); 
+
+hearts.children.iterate(function(child) {
+    child.setScale(0.07);
+});
+
+hearts.children.iterate(function (child) {
+
+    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
+});
+
+
+  // життя
+  lifeText = this.add.text(1500, 20, showLife(), { fontSize: '40px', fill: '#000' })
+  .setOrigin(0, 0)
+  .setScrollFactor(0);
+
+  this.physics.add.collider(hearts, platforms);
+  this.physics.add.overlap(player, hearts, collectHeart, null, this);
+
+
+var resetButton = this.add.text(10, 1000, 'reset', { fontSize: '90px', fill: 'black' })
+        .setInteractive()
+        .setScrollFactor(0);
+
+    resetButton.on('pointerdown', function () {
+        location.reload();
+    });
+
 function update() {
     // управління
     if (cursors.left.isDown) {
@@ -219,7 +256,7 @@ function collectStar(player, star) {
     var x = Phaser.Math.Between(0, config.width);
     var y = Phaser.Math.Between(0, 680);
     var bomb = bombs.create(x, y, 'bomb');
-    bomb.setBounce(1);
+    bomb.setBounce(11);
     bomb.setCollideWorldBounds(true);
     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
 
@@ -230,6 +267,26 @@ function collectStar(player, star) {
         });
 
     }
+}
+
+function collectHeart(player, heart) {
+    heart.disableBody(true, true);
+
+    life += 1;
+
+    lifeText.setText(showLife());
+
+    console.log(life)
+}
+
+function showLife() {
+    var lifeLine = ''
+
+    for (var i = 0; i < life; i++) {
+        lifeLine += '💖'
+    }
+
+    return lifeLine
 }
 
 
@@ -248,24 +305,17 @@ function hitBomb(player, bomb) {
 
         gameOver = true;
 
+        const helloButton = this.add.text(600, 400, 'Restart game', { fontSize: 90, fill: '#FFF', backgroundColor: '#111' })
+            .on('pointerdown', () => this.scene.restart(), life = 5)
+            .setScrollFactor(0)
+            .setInteractive();
        
     }
 
 
-    resetyButton.on('pointerdown', function() {
-        self.physics.resume();
-        player.disableBody(true, true);
-        player = self.physics.add.sprite(100, 450, 'dude');
-        player.setBounce(0, 2);
-        player.setCollideWorldBounds(true);
-        gameOver = false;
-        self.scene.restart();
-        score = 0;
-        
-
-    }
+   
     
     
     
-    )
+    
 }
