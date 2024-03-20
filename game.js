@@ -177,7 +177,7 @@ function create() {
         .setScrollFactor(0);
 
 
-        //фізика та колайдери
+        //фізика та колайдери +
     bombs = this.physics.add.group();
     this.physics.add.collider(bombs, platforms);
     this.physics.add.overlap(bombs, platforms);
