@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Дідківський Андрій</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <script src="game.js"></script>
+    <link rel="stelesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+    <div id="game"></div>
+
+    
+</body>
+</html>
