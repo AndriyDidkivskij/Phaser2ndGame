@@ -162,8 +162,9 @@ function create() {
 
     stars.children.iterate(function (child) {
 
-        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-        
+        child
+        .setBounceY(Phaser.Math.FloatBetween(0.4, 0.8))
+        .setDepth(11)
     });
 
 
@@ -179,6 +180,7 @@ function create() {
         //фізика та колайдери
     bombs = this.physics.add.group();
     this.physics.add.collider(bombs, platforms);
+    this.physics.add.overlap(bombs, platforms);
     this.physics.add.collider(player, bombs, hitBomb, null, this);
     this.physics.add.collider(platforms);
     this.physics.add.overlap(player, null, this);
@@ -214,14 +216,11 @@ hearts.children.iterate(function (child) {
   this.physics.add.collider(hearts, platforms);
   this.physics.add.overlap(player, hearts, collectHeart, null, this);
 
+ 
 
-var resetButton = this.add.text(10, 1000, 'reset', { fontSize: '90px', fill: 'black' })
-        .setInteractive()
-        .setScrollFactor(0);
 
-    resetButton.on('pointerdown', function () {
-        location.reload();
-    });
+
+  
 
 function update() {
     // управління
@@ -255,10 +254,15 @@ function collectStar(player, star) {
 
     var x = Phaser.Math.Between(0, config.width);
     var y = Phaser.Math.Between(0, 680);
+
+
+    //бомби
     var bomb = bombs.create(x, y, 'bomb');
-    bomb.setBounce(11);
+    bomb.setBounce(1);
     bomb.setCollideWorldBounds(true);
     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+    bomb.setDepth(11);
+
 
     if (stars.countActive(true) === 0) {
         stars.children.iterate(function (child) {
