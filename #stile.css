@@ -1,0 +1,21 @@
+bode {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#game {
+     position:absolute;
+}
+#score {
+position: fixed;
+top: 10px;
+left: 10px;
+}
+timer{
+    position: fixed;
+    top: 10px;
+    left: 1000px;
+}
+
