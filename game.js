@@ -257,7 +257,7 @@ function collectStar(player, star) {
 
 
     //бомби
-    var bomb = bombs.create(x, y, 'bomb');
+    var bomb = bombs.create(Phaser.Math.Between(0, worldWidth),16, 'bomb');
     bomb.setBounce(1);
     bomb.setCollideWorldBounds(true);
     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
@@ -265,6 +265,7 @@ function collectStar(player, star) {
 
 
     if (stars.countActive(true) === 0) {
+        gameOver = true;
         stars.children.iterate(function (child) {
             child.enableBody(true, child.x, 0, true, true);
             child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
