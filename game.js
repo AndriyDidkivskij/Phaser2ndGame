@@ -291,7 +291,7 @@ function showLife() {
         lifeLine += '💖'
     }
 
-    return lifeLine
+    return lifeLine;
 }
 
 
