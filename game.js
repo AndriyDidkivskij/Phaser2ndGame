@@ -268,7 +268,7 @@ function collectStar(player, star) {
         gameOver = true;
         stars.children.iterate(function (child) {
             child.enableBody(true, child.x, 0, true, true);
-            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+            child.setBounceY(Phaser.Math.FloatBetween(0.7, 1));
         });
 
     }
