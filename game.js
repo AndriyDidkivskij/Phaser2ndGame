@@ -298,7 +298,7 @@ function showLife() {
 
 // опис бомбочок
 function hitBomb(player, bomb) {
-    life -= 1;
+    life -= 5;
     bomb.disableBody(true, true);
 
     if (life === 0) {
@@ -313,7 +313,8 @@ function hitBomb(player, bomb) {
         const helloButton = this.add.text(600, 400, 'Restart game', { fontSize: 90, fill: '#FFF', backgroundColor: '#111' })
             .on('pointerdown', () => this.scene.restart(), life = 5)
             .setScrollFactor(0)
-            .setInteractive();
+            .setInteractive()
+            .setDepth(11);
        
     }
 
