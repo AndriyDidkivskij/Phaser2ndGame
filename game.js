@@ -18,7 +18,7 @@ let config = {
 };
 
 let game = new Phaser.Game(config);
-let worldWidth = config.width * 8;
+let worldWidth = 9600;
 let platforms;
 let life = 5;
 let score = 0;
@@ -27,6 +27,7 @@ let lifeText;
 
 
 function preload() {
+    //Load all assets
     this.load.image('sky', 'assets/sky.jpg');
     this.load.image('ground', 'assets/ground.jpg');
     this.load.image('skyGround', 'assets/2.png')
@@ -37,28 +38,20 @@ function preload() {
     this.load.image('bush', 'assets/bush.webp')
     this.load.image('tree', 'assets/tree.png')
     this.load.image('stone', 'assets/Stone.webp')
-
-    this.load.spritesheet('dude',
-        'assets/dude.png',
-        { frameWidth: 32, frameHeight: 48 });
-
-
-
-
-
-    // гравець
-    this.load.spritesheet('dude',
-        'assets/dude.png',
-        { frameWidth: 32, frameHeight: 48 }
-    );
+    this.load.image('hearts', 'assets/health.png')
+    //Player
+    this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
 }
 
 function create() {
+
+    //#region Background
     // тло на всю ширину екрану
-    this.add.tileSprite(0, 0, 10000, 1080, "sky")
+    this.add.tileSprite(0, 0, worldWidth, 1080, "sky")
         .setOrigin(0, 0)
         .setScale(2)
-        .setDepth(0);
+        .setScrollFactor(0);
+
 
     platforms = this.physics.add.staticGroup();
 
@@ -70,59 +63,49 @@ function create() {
             .setBounce(1)
             .refreshBody();
     }
+    //endregion
 
-    // платформи на всю ширину екрану
-    for (var x = 0; x < worldWidth; x = x + Phaser.Math.Between(400, 500)) {
-        var y = Phaser.Math.Between(300, 900)
+    //#region Levitating platforms
+    for (var x = 0; x < worldWidth; x = x + Phaser.Math.Between(500, 700)) {
 
-        platforms.create(x, y, 'skyGroundStart')
-        .setDepth(11);
+        var y = Phaser.Math.Between(450, 900);
 
-        var i;
-        for (i = 1; i < Phaser.Math.Between(0, 5); i++) {
-            platforms.create(x + 128 * i, y, 'skyGround')
-            .setDepth(11);
+        platforms.create(x, y, 'skyGroundStart').setDepth(100);
+
+        for (var i = 1; i <= Phaser.Math.Between(1, 2); i++) {
+
+            platforms.create(x + 128 * i, y, 'skyGround').setDepth(100);
+
         }
 
-        platforms.create(x + 128 * i, y, 'skyGroundEnd')
-        .setDepth(11);
+        platforms.create(x + 128 * i, y, 'skyGroundEnd').setDepth(100)
+    }
+    //#endregion
+
+    //#region Create world Objects
+    function createWorldObjects(objects, asset) {
+        for (var x = 0; x <= worldWidth; x = x + Phaser.Math.FloatBetween(500, 900)) {
+            objects
+                .create(x, 1080 - 128, asset)
+                .setOrigin(0, 1)
+                .setScale(Phaser.Math.FloatBetween(0.09, 0.1,))
+                .setDepth(Phaser.Math.Between(1, 10))
+        }
     }
 
     tree = this.physics.add.staticGroup();
-    // Додавання дерев випадковим чином на всю ширину екрану
-    for (var x = 0; x < worldWidth; x = x + Phaser.Math.FloatBetween(500, 1500)) {
-        var y = 952;
-        tree.create(x, y, 'tree')
-            .setScale(Phaser.Math.FloatBetween(0.1, 0.5))
-            .setOrigin(0, 1)
-            .setDepth(Phaser.Math.FloatBetween(0, 10))
-            .refreshBody();
-    }
+    createWorldObjects(tree, 'tree')
 
     bush = this.physics.add.staticGroup();
-    // Додавання кущів випадковим чином на всю ширину екрану
-    for (var x = 0; x < worldWidth; x = x + Phaser.Math.FloatBetween(300, 500)) {
-        var y = 952;
-        bush.create(x, y, 'bush')
-            .setScale(Phaser.Math.FloatBetween(0.1, 0.2))
-            .setOrigin(0, 1).setDepth(Phaser.Math.FloatBetween(0, 10))
-            .refreshBody();
-    }
+    createWorldObjects(bush, 'bush')
 
     stone = this.physics.add.staticGroup();
-    // Додавання каменів випадковим чином на всю ширину екрану
-    for (var x = 0; x < worldWidth; x = x + Phaser.Math.FloatBetween(300, 700)) {
-        var y = 952;
-        stone.create(x, y, 'stone')
-            .setScale(Phaser.Math.FloatBetween(0.1, 0.2))
-            .setOrigin(0, 1)
-            .setDepth(Phaser.Math.FloatBetween(0, 10))
-            .refreshBody();
-    }
+    createWorldObjects(stone, 'stone')
+    //#endregion
 
-    // про гравця
+    //#region Player
     player = this.physics.add.sprite(100, 450, 'dude')
-        .setDepth(11)
+        .setDepth(100)
         .setBounce(0.2)
         .setCollideWorldBounds(false);
 
@@ -146,81 +129,82 @@ function create() {
         repeat: -1
     });
 
+    player.setCollideWorldBounds(true);
+
     // коллайдер гравця та платформ
     this.physics.add.collider(player, platforms);
 
     //  задання управління
     cursors = this.input.keyboard.createCursorKeys();
+    //#endregion
 
-    // зірки
+    //#region Stars
     stars = this.physics.add.group({
         key: 'star',
         repeat: worldWidth / 100,
         setXY: { x: 12, y: 0, stepX: 100 }
-    
+
     });
 
     stars.children.iterate(function (child) {
 
         child
-        .setBounceY(Phaser.Math.FloatBetween(0.4, 0.8))
-        .setDepth(11)
+            .setBounceY(Phaser.Math.FloatBetween(0.4, 0.8))
+            .setDepth(11)
     });
 
 
     this.physics.add.collider(stars, platforms);
     this.physics.add.overlap(player, stars, collectStar, null, this);
+    //endregion
 
     //  рахунок
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' })
         .setOrigin(0, 0)
-        .setScrollFactor(0);
+        .setScrollFactor(0)
+        .setDepth(100);
 
 
-        //фізика та колайдери +
+    //фізика та колайдери +
     bombs = this.physics.add.group();
     this.physics.add.collider(bombs, platforms);
     this.physics.add.overlap(bombs, platforms);
     this.physics.add.collider(player, bombs, hitBomb, null, this);
-    this.physics.add.collider(platforms);
     this.physics.add.overlap(player, null, this);
     this.cameras.main.setBounds(0, 0, worldWidth, 1080);
     this.physics.world.setBounds(0, 0, worldWidth, 1080);
     this.cameras.main.startFollow(player);
+
+    hearts = this.physics.add.group({
+        key: 'hearts',
+        repeat: 10,
+        setXY: { x: 12, y: 0, stepX: Phaser.Math.FloatBetween(1000, 2500) }
+    });
+
+    hearts.children.iterate(function(child) {
+        child.setScale(0.07);
+        child.setDepth(100)
+    });
+
+    hearts.children.iterate(function (child) {
+
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
+    });
+
+    this.physics.add.collider(hearts, platforms)
+
+    lifeText = this.add.text(1000, 16, showlife(), { fontSize: '50px', fill: '#111' }).setScrollFactor(0);
+
+    this.physics.add.collider(hearts, platforms);
+    this.physics.add.overlap(player, hearts, collectHeart, null, this);
 }
 
 
-// життя
-hearts = this.physics.add.group({
-    key: 'heartss',
-    repeat: 10,
-    setXY: { x: 12, y: 0, stepX: Phaser.Math.FloatBetween(1000, 2500) }
-}); 
-
-hearts.children.iterate(function(child) {
-    child.setScale(0.07);
-});
-
-hearts.children.iterate(function (child) {
-
-    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-
-});
-
-
-  // життя
-  lifeText = this.add.text(1500, 20, showLife(), { fontSize: '40px', fill: '#000' })
-  .setOrigin(0, 0)
-  .setScrollFactor(0);
-
-  this.physics.add.collider(hearts, platforms);
-  this.physics.add.overlap(player, hearts, collectHeart, null, this);
-
- 
 
 
 
-  
+
 
 function update() {
     // управління
@@ -279,16 +263,16 @@ function collectHeart(player, heart) {
 
     life += 1;
 
-    lifeText.setText(showLife());
+    lifeText.setText(showlife());
 
     console.log(life)
 }
 
-function showLife() {
+function showlife() {
     var lifeLine = ''
 
-    for (var i = 0; i < life; i++) {
-        lifeLine += '💖'
+    for (i = 0; i < life; i++) {
+        lifeLine = lifeLine + '💖';
     }
 
     return lifeLine;
@@ -298,7 +282,8 @@ function showLife() {
 
 // опис бомбочок
 function hitBomb(player, bomb) {
-    life -= 5;
+    life -= 1;
+    lifeText.setText(showlife());
     bomb.disableBody(true, true);
 
     if (life === 0) {
@@ -310,18 +295,11 @@ function hitBomb(player, bomb) {
 
         gameOver = true;
 
-        const helloButton = this.add.text(600, 400, 'Restart game', { fontSize: 90, fill: '#FFF', backgroundColor: '#111' })
+        const helloButton = this.add.text(500, 400, 'Restart game', { fontSize: 90, fill: '#FFF', backgroundColor: '#111' })
             .on('pointerdown', () => this.scene.restart(), life = 5)
             .setScrollFactor(0)
             .setInteractive()
             .setDepth(11);
-       
+
     }
-
-
-   
-    
-    
-    
-    
 }
